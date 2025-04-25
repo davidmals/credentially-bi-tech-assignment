@@ -2,8 +2,297 @@ cultureInfo en-US
 
 	linguisticMetadata =
 			{
-			  "Version": "1.0.0",
-			  "Language": "en-US"
+			  "Version": "2.0.0",
+			  "Language": "en-US",
+			  "Entities": {
+			    "ref_references.job_position_id": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "job_position_id"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Job ID": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.ref_status": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "ref_status"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Reference Status": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        },
+			        {
+			          "Referance Status": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.ref_completed_date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "ref_completed_date"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "ref_references.is_mandatory": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "is_mandatory"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Mandatory?": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.ref_completed_at": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "ref_completed_at"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Completed At": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.reviewed_within_sla_5_days": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "% Reviewed Within SLA (5 Days)"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "% Total Completed": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.reviews_awaiting_approval": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "# Reviews Awaiting Approval"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Number of Ref Awaiting Approval": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        },
+			        {
+			          "# Awaiting Approval": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.mandatory_approved_on_time": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "% Mandatory Approved On Time"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "% Mandatory Completed": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.nonmandatory_approved_on_time": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "% Non-Mandatory Approved On Time"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "ref_references.mandatory_reviews_awaiting_approval": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "# Mandatory Reviews Awaiting Approval"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "# Mandatory Reviews Awaiting": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.target_mandatory_completed_within_sla": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "Target Mandatory Completed Within SLA"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "ref_references.target_total_completed_within_sla": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "Target Total Completed Within SLA"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "ref_references.rolling_avg_submitted_to_reviewed_days": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "Rolling Avg Submitted to Reviewed Days"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Rolling Average Number of Days - Submitted to Reviewed": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.number_of_approved_references": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "Number of Approved References"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Number of Approved Ref": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "ref_references.number_of_references": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "ref_references",
+			          "ConceptualProperty": "Number of References"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Number of Ref": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    }
+			  }
 			}
 		contentType: json
 

@@ -1,12 +1,12 @@
 table ref_references
 	lineageTag: b885eee8-b7ee-4f2f-9ec6-ed55be4ca767
 
-	measure 'Avg Requested To Reviewed Time' = AVERAGE(ref_references[requested_to_reviewed_time])
+	measure 'Avg Requested To Reviewed Time (Days)' = AVERAGE(ref_references[requested_to_reviewed_time]) / 86400
 		lineageTag: 041a0674-71e9-4b34-9cad-d74563756b46
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Avg Requested To Submitted Time' = AVERAGE(ref_references[requested_to_completed_time])
+	measure 'Avg Requested To Submitted Time' = AVERAGE(ref_references[requested_to_completed_time]) / 3600
 		lineageTag: 66928b21-7fd6-46c2-9aad-085899a5ff6b
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
@@ -85,6 +85,141 @@ table ref_references
 		lineageTag: 05c43ece-3a31-45a5-b65d-28685ca8eab2
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% Reviewed Within SLA (5 Days)' =
+			
+			VAR SLA_SECONDS = 432000
+			VAR SelectedEndDate = MAX('Dates'[Date])
+			
+			RETURN
+			DIVIDE(
+			    COUNTROWS(
+			        FILTER(
+			            ref_references,
+			            (
+			                -- SLA Pass: Approved/Denied and reviewed in ≤ 5 days
+			                ref_references[ref_status] IN {"Approved", "Denied"} &&
+			                ref_references[requested_to_reviewed_time] <= SLA_SECONDS
+			            )
+			        )
+			    ),
+			    COUNTROWS(
+			        FILTER(
+			            ref_references,
+			            (
+			                -- Approved/Denied (always included)
+			                ref_references[ref_status] IN {"Approved", "Denied"}
+			            )
+			            ||
+			            (
+			                -- Awaiting Approval and request is older than 5 days (based on selected end date)
+			                ref_references[ref_status] = "Awaiting_Approval" &&
+			                DATEDIFF(ref_references[ref_requested_at], SelectedEndDate, SECOND) > SLA_SECONDS
+			            )
+			        )
+			    )
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 07ba385c-81a0-48fc-afdb-992aef53502d
+
+	measure '# Reviews Awaiting Approval' =
+			
+			CALCULATE(
+			    COUNTROWS(ref_references),
+			    ref_references[ref_status] = "Awaiting_Approval"
+			)
+		formatString: 0
+		lineageTag: 8614fafc-1368-4436-bfd6-58bedd685fe6
+
+	measure '% Mandatory Approved On Time' = ```
+			
+			VAR SLA_SECONDS = 432000
+			VAR SelectedEndDate = MAX('Dates'[Date])
+			
+			RETURN
+			DIVIDE(
+			    -- Count of mandatory references approved or denied within SLA
+			    COUNTROWS(
+			        FILTER(
+			            ref_references,
+			            ref_references[is_mandatory] = TRUE() &&
+			            ref_references[ref_status] IN {"Approved", "Denied"} &&
+			            ref_references[requested_to_reviewed_time] <= SLA_SECONDS
+			        )
+			    ),
+			    --  Total mandatory references that should have been reviewed
+			    COUNTROWS(
+			        FILTER(
+			            ref_references,
+			            ref_references[is_mandatory] = TRUE() &&
+			            (
+			                ref_references[ref_status] IN {"Approved", "Denied"} ||
+			                (
+			                    ref_references[ref_status] = "Awaiting_Approval" &&
+			                    DATEDIFF(ref_references[ref_requested_at], SelectedEndDate, SECOND) > SLA_SECONDS
+			                )
+			            )
+			        )
+			    )
+			)
+			
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: c4bb7570-c498-4843-952e-b5fc6a8cda6d
+
+	measure '% Non-Mandatory Approved On Time' = ```
+			
+			VAR SLA_SECONDS = 432000
+			VAR SelectedEndDate = MAX('Dates'[Date])
+			
+			RETURN
+			DIVIDE(
+			    -- Count of mandatory references approved or denied within SLA
+			    COUNTROWS(
+			        FILTER(
+			            ref_references,
+			            ref_references[is_mandatory] = FALSE() &&
+			            ref_references[ref_status] IN {"Approved", "Denied"} &&
+			            ref_references[requested_to_reviewed_time] <= SLA_SECONDS
+			        )
+			    ),
+			   -- Total mandatory references that should have been reviewed
+			    COUNTROWS(
+			        FILTER(
+			            ref_references,
+			            ref_references[is_mandatory] = FALSE() &&
+			            (
+			                ref_references[ref_status] IN {"Approved", "Denied"} ||
+			                (
+			                    ref_references[ref_status] = "Awaiting_Approval" &&
+			                    DATEDIFF(ref_references[ref_requested_at], SelectedEndDate, SECOND) > SLA_SECONDS
+			                )
+			            )
+			        )
+			    )
+			)
+			
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 3d1ba0e9-00bf-4d84-aaa9-2149a8e59797
+
+	measure '# Mandatory Reviews Awaiting Approval' =
+			
+			CALCULATE(
+			    COUNTROWS(ref_references),
+			    ref_references[ref_status] = "Awaiting_Approval",
+			    ref_references[is_mandatory] = TRUE()
+			)
+		formatString: 0
+		lineageTag: 35199814-21c0-4ea7-a373-182be4b6b8c2
+
+	measure 'Target Mandatory Completed Within SLA' = 0.6
+		formatString: 0%;-0%;0%
+		lineageTag: e6f338c9-5563-41f1-97f6-f9fd2f5acc5e
+
+	measure 'Target Total Completed Within SLA' = 0.5
+		formatString: 0%;-0%;0%
+		lineageTag: 78a86bdf-7a71-4960-9dba-7e5909b895e6
 
 	column completed_to_reviewed_days
 		dataType: int64
@@ -274,17 +409,79 @@ table ref_references
 
 		annotation SummarizationSetBy = Automatic
 
+	column requested_to_reviewed_days
+		dataType: string
+		lineageTag: b8613b63-7049-4b73-9dc2-d240c93c18d3
+		summarizeBy: none
+		sourceColumn: requested_to_reviewed_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column requested_to_compliant_days
+		dataType: string
+		lineageTag: 216a1058-ec07-4b09-8bc3-93d72b361118
+		summarizeBy: none
+		sourceColumn: requested_to_compliant_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column requested_to_completed_category
+		dataType: string
+		lineageTag: 3445cad6-7d3b-468a-960b-86e27b44a13b
+		summarizeBy: none
+		sourceColumn: requested_to_completed_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column completed_to_reviewed_category
+		dataType: string
+		lineageTag: 442ced99-a31c-4a04-8d71-1da100958f7f
+		summarizeBy: none
+		sourceColumn: completed_to_reviewed_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column requested_to_reviewed_category
+		dataType: string
+		lineageTag: 126b24a3-d8c4-47cb-9a3b-9cd610b3da3a
+		summarizeBy: none
+		sourceColumn: requested_to_reviewed_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column requested_to_compliant_category
+		dataType: string
+		lineageTag: 3ce52e0d-ceea-47b4-bfb4-bbb143ada6fe
+		summarizeBy: none
+		sourceColumn: requested_to_compliant_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_valid =
+			
+			SWITCH(
+			    TRUE(),
+			    ref_references[ref_status] = "AWAITING_APPROVAL" && ISBLANK(ref_references[ref_completed_at]), "N",
+			    ref_references[ref_status] = "APPROVED" && (ISBLANK(ref_references[ref_completed_at]) || ISBLANK(ref_references[ref_approved_at])), "N",
+			    ref_references[ref_status] = "DENIED" && (ISBLANK(ref_references[ref_completed_at]) || ISBLANK(ref_references[ref_approved_at])), "N",
+			    "Y"
+			)
+		lineageTag: bbc4628c-7d84-4429-aad0-f9776109d496
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	partition ref_references = m
 		mode: import
 		queryGroup: References
 		source =
 				let
-				    Source = Web.BrowserContents("https://drive.google.com/file/d/1mQj30vUWHMDdVPJVJk4qLh9jD3BYCvSM/view?usp=sharing"),
-				    #"Extracted Table From Html" = Html.Table(Source, {{"Column1", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(1)"}, {"Column2", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(2)"}, {"Column3", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(3)"}, {"Column4", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(4)"}, {"Column5", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(5)"}, {"Column6", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(6)"}, {"Column7", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(7)"}, {"Column8", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(8)"}, {"Column9", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(9)"}, {"Column10", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(10)"}, {"Column11", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(11)"}, {"Column12", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(12)"}, {"Column13", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(13)"}, {"Column14", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(14)"}, {"Column15", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(15)"}, {"Column16", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(16)"}, {"Column17", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(17)"}, {"Column18", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(18)"}, {"Column19", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(19)"}, {"Column20", "TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR > :nth-child(20)"}}, [RowSelector="TABLE.ndfHFb-c4YZDc-hDEnYe-Df1ZY-bN97Pc > * > TR"]),
-				    #"Promoted Headers" = Table.PromoteHeaders(#"Extracted Table From Html", [PromoteAllScalars=true]),
-				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"job_position_id", Int64.Type}, {"ref_requested_at", type datetime}, {"ref_requested_date", type date}, {"ref_completed_at", type datetime}, {"ref_completed_date", type date}, {"ref_approved_at", type datetime}, {"ref_approved_date", type date}, {"is_mandatory", type logical}, {"ref_package_name", type text}, {"ref_form_name", type text}, {"cr_created_at", type datetime}, {"marked_compliant_at", type datetime}, {"requested_to_completed_time", type number}, {"completed_to_reviewed_time", type number}, {"requested_to_reviewed_time", type number}, {"requested_to_compliant_time", type number}, {"ref_status", type text}, {"ref_approval_status", type text}, {"requested_to_completed_days", Int64.Type}, {"completed_to_reviewed_days", Int64.Type}})
-				in
-				    #"Changed Type"
+								    Source = Csv.Document(Web.Contents("https://drive.google.com/uc?export=download&id=1mQj30vUWHMDdVPJVJk4qLh9jD3BYCvSM"),
+				        								  [Delimiter = ",", Encoding = 65001]),
+				    				#"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+								    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"job_position_id", Int64.Type}, {"ref_requested_at", type datetime}, {"ref_requested_date", type date}, {"ref_completed_at", type datetime}, {"ref_completed_date", type date}, {"ref_approved_at", type datetime}, {"ref_approved_date", type date}, {"is_mandatory", type logical}, {"ref_package_name", type text}, {"ref_form_name", type text}, {"cr_created_at", type datetime}, {"marked_compliant_at", type datetime}, {"requested_to_completed_time", type number}, {"completed_to_reviewed_time", type number}, {"requested_to_reviewed_time", type number}, {"requested_to_compliant_time", type number}, {"ref_status", type text}, {"ref_approval_status", type text}, {"requested_to_completed_days", Int64.Type}, {"completed_to_reviewed_days", Int64.Type}})
+								in
+								    #"Changed Type"
 
 	annotation PBI_NavigationStepName = Navigation
 
