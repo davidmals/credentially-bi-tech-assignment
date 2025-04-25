@@ -23,9 +23,7 @@ In the repository, you will find a pre-prepared semantic model along with source
 
 ### Video Walkthrough
 
-Please find a video walkthrough of my explanation and reasoning why I did certain decisions.
-
-https://youtu.be/MGvxcDTTbqI?si=XorSQSiE8C5mg2gU
+Please find on the email I sent with the repo link a video link walkthrough of my explanation and reasoning why I did certain decisions.
 
 ### Conclusion
 
